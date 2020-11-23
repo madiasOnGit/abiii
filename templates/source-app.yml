@@ -1,0 +1,266 @@
+
+Description: Template to create source php Web App demo
+
+Resources:
+  onPremVPC:
+    Type: 'AWS::EC2::VPC'
+    Properties:
+      CidrBlock: 10.20.0.0/16
+      Tags:
+        - Key: Name
+          Value: !Join [_, [!Ref 'AWS::StackName', VPC]]
+  
+  PublicSubnet1:
+    Type: 'AWS::EC2::Subnet'
+    Properties:
+      VpcId: !Ref onPremVPC
+      AvailabilityZone: !Select
+        - '0'
+        - !GetAZs ''
+      CidrBlock: 10.20.0.0/24
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: !Join [_, [!Ref 'AWS::StackName', PublicSubnet1]]
+  
+  PublicSubnet2:
+    Type: 'AWS::EC2::Subnet'
+    Properties:
+      VpcId: !Ref onPremVPC
+      AvailabilityZone: !Select
+        - '1'
+        - !GetAZs ''
+      CidrBlock: 10.20.4.0/24
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: !Join [_, [!Ref 'AWS::StackName', PublicSubnet2]]
+  
+  PrivateSubnet:
+    Type: 'AWS::EC2::Subnet'
+    Properties:
+      AvailabilityZone: !Select
+        - '0'
+        - !GetAZs ''
+      VpcId: !Ref onPremVPC
+      CidrBlock: 10.20.1.0/24
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: !Join [_, [!Ref 'AWS::StackName', PrivateSubnet]]
+ 
+  InternetGateway:
+    Type: 'AWS::EC2::InternetGateway'
+    Properties:
+      Tags:
+        - Key: Name
+          Value: !Join [_, [!Ref 'AWS::StackName', IGW]]
+  
+  GatewayToInternet:
+    Type: 'AWS::EC2::VPCGatewayAttachment'
+    Properties:
+      VpcId: !Ref onPremVPC
+      InternetGatewayId: !Ref InternetGateway
+  
+  PublicRouteTable:
+    Type: 'AWS::EC2::RouteTable'
+    Properties:
+      VpcId: !Ref onPremVPC
+
+  PublicRoute:
+    Type: 'AWS::EC2::Route'
+    DependsOn: GatewayToInternet
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref InternetGateway
+
+  PublicSubnet1RouteTableAssociation:
+    Type: 'AWS::EC2::SubnetRouteTableAssociation'
+    Properties:
+      SubnetId: !Ref PublicSubnet1
+      RouteTableId: !Ref PublicRouteTable
+
+  PublicSubnet2RouteTableAssociation:
+    Type: 'AWS::EC2::SubnetRouteTableAssociation'
+    Properties:
+      SubnetId: !Ref PublicSubnet2
+      RouteTableId: !Ref PublicRouteTable
+
+  NatGateway:
+    Type: "AWS::EC2::NatGateway"
+    DependsOn: NatPublicIP
+    Properties:
+      AllocationId: !GetAtt NatPublicIP.AllocationId
+      SubnetId: !Ref PublicSubnet1
+  NatPublicIP:
+    Type: "AWS::EC2::EIP"
+    DependsOn: onPremVPC
+    Properties:
+      Domain: vpc
+
+  PrivateRouteTable:
+    Type: 'AWS::EC2::RouteTable'
+    Properties:
+      VpcId: !Ref onPremVPC
+  PrivateRoute:
+    Type: 'AWS::EC2::Route'
+    Properties:
+      RouteTableId: !Ref PrivateRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId: !Ref NatGateway
+
+  PrivateSubnetRouteTableAssociation:
+    Type: 'AWS::EC2::SubnetRouteTableAssociation'
+    Properties:
+      SubnetId: !Ref PrivateSubnet
+      RouteTableId: !Ref PrivateRouteTable
+
+  
+
+  ## App layer (EC2 instance, ALB, Security groups, EC2 SSM Role) ##
+  SecurityGroupHTTPALB:
+    Type: 'AWS::EC2::SecurityGroup'
+    Properties:
+      GroupName: HTTPSgALB
+      GroupDescription: HTTP(S)
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: '80'
+          ToPort: '80'
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: '443'
+          ToPort: '443'
+          CidrIp: 0.0.0.0/0
+      VpcId: !Ref onPremVPC
+      Tags:
+        - Key: Name
+          Value: HTTPSgALB
+  WebSecurityGroup:
+    Type: 'AWS::EC2::SecurityGroup'
+    Properties:
+      GroupName: WebSg
+      GroupDescription: HTTP(S)
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: '80'
+          ToPort: '80'
+          SourceSecurityGroupId: !Ref SecurityGroupHTTPALB
+        - IpProtocol: tcp
+          FromPort: '443'
+          ToPort: '443'
+          SourceSecurityGroupId: !Ref SecurityGroupHTTPALB
+      VpcId: !Ref onPremVPC
+      Tags:
+        - Key: Name
+          Value: WebSg
+  EC2App1:
+    Type: 'AWS::EC2::Instance'
+    Properties:
+      ImageId: ami-014ce76919b528bff
+      InstanceType: t2.micro
+      SubnetId: !Ref PrivateSubnet
+      KeyName: devKeyIreland
+      SecurityGroupIds:
+        - !Ref WebSecurityGroup
+      UserData:
+        Fn::Base64:
+          !Sub |
+            #!/bin/bash
+            # Install dependecies
+            sudo yum update -y
+            sudo yum install php php-memcache git -y
+            # Clone repository
+            git clone https://github.com/aws-samples/aws-ec2-autoscaling-php-app-demo.git
+            sudo mv aws-ec2-autoscaling-php-app-demo/src/app/* /var/www/html/
+            sudo mv aws-ec2-autoscaling-php-app-demo/src/image/ /var/www/html/
+            sudo mv aws-ec2-autoscaling-php-app-demo/src/css/ /var/www/html/
+            # Start apache
+            sudo service httpd start
+            chkconfig httpd on
+      Tags:
+        - Key: Name
+          Value: AppInstance1
+  EC2App2:
+    Type: 'AWS::EC2::Instance'
+    Properties:
+      ImageId: ami-014ce76919b528bff
+      InstanceType: t2.micro
+      SubnetId: !Ref PrivateSubnet
+      KeyName: devKeyIreland
+      SecurityGroupIds:
+        - !Ref WebSecurityGroup
+      UserData:
+        Fn::Base64:
+          !Sub |
+            #!/bin/bash
+            # Install dependecies
+            sudo yum update -y
+            sudo yum install php php-memcache git -y
+            # Clone repository
+            git clone https://github.com/aws-samples/aws-ec2-autoscaling-php-app-demo.git
+            sudo mv aws-ec2-autoscaling-php-app-demo/src/app/* /var/www/html/
+            sudo mv aws-ec2-autoscaling-php-app-demo/src/image/ /var/www/html/
+            sudo mv aws-ec2-autoscaling-php-app-demo/src/css/ /var/www/html/
+            # Start apache
+            sudo service httpd start
+            chkconfig httpd on
+      Tags:
+        - Key: Name
+          Value: AppInstance2
+  TALB:
+    Type: 'AWS::ElasticLoadBalancingV2::TargetGroup'
+    DependsOn:
+      - EC2App1
+      - EC2App2
+    Properties:
+      Name: tg-app
+      VpcId: !Ref onPremVPC
+      TargetType: instance
+      Port: 80
+      Protocol: HTTP
+      HealthyThresholdCount: 2
+      UnhealthyThresholdCount: 2
+      HealthCheckTimeoutSeconds: 2
+      HealthCheckIntervalSeconds: 5
+      TargetGroupAttributes:
+        - Key: deregistration_delay.timeout_seconds
+          Value: 10
+      Targets:
+        - Id: !Ref EC2App1
+        - Id: !Ref EC2App2
+  ALB:
+    Type: 'AWS::ElasticLoadBalancingV2::LoadBalancer'
+    DependsOn:
+      - TALB
+    Properties:
+      Subnets:
+        - !Ref PublicSubnet1
+        - !Ref PublicSubnet2
+      Name: alb-app
+      SecurityGroups:
+        - !Ref SecurityGroupHTTPALB
+  ALBListener:
+    Type: 'AWS::ElasticLoadBalancingV2::Listener'
+    Properties:
+      DefaultActions:
+        - Type: forward
+          TargetGroupArn: !Ref TALB
+      LoadBalancerArn: !Ref ALB
+      Port: 80
+      Protocol: HTTP
+
+
+## Outputs ##
+Outputs:
+  VPCID:
+    Description: onPremVPC ID
+    Value: !Ref "onPremVPC"
+    Export:
+      Name: AppVPCID
+  ALBDNS:
+    Description: URL to access the application
+    Value: !GetAtt ALB.DNSName
+    Export:
+      Name: ALBAppURL
