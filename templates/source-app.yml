@@ -226,12 +226,14 @@ Resources:
             # Install dependecies
             sudo yum update -y
             sudo yum install php php-mysql git -y
+
+            echo "<?php \$dbserver=${EC2DB.PrivateIp} ?>" > db.php
+            sudo mv db.php /var/www/html/
+
             # Clone repository
-            git clone https://github.com/aws-samples/aws-ec2-autoscaling-php-app-demo.git
-            sudo mv aws-ec2-autoscaling-php-app-demo/src/app/* /var/www/html/
-            sudo mv aws-ec2-autoscaling-php-app-demo/src/image/ /var/www/html/
-            sudo mv aws-ec2-autoscaling-php-app-demo/src/css/ /var/www/html/
-            echo 
+            git clone https://github.com/madiasOnGit/abiii.git
+            sudo mv abiii/onPremApp/app/* /var/www/html/
+            sudo mv abiii/onPremApp/css/ /var/www/html/
             # Start apache
             sudo service httpd start
             chkconfig httpd on
@@ -254,11 +256,16 @@ Resources:
             # Install dependecies
             sudo yum update -y
             sudo yum install php php-mysql git -y
+
+            echo "\$dbserver=${EC2DB.PrivateIp}" > db.php
+            sudo mv db.php /var/www/html/
+
             # Clone repository
-            git clone https://github.com/aws-samples/aws-ec2-autoscaling-php-app-demo.git
-            sudo mv aws-ec2-autoscaling-php-app-demo/src/app/* /var/www/html/
-            sudo mv aws-ec2-autoscaling-php-app-demo/src/image/ /var/www/html/
-            sudo mv aws-ec2-autoscaling-php-app-demo/src/css/ /var/www/html/
+            git clone https://github.com/madiasOnGit/abiii.git
+            sudo mv abiii/onPremApp/app/* /var/www/html/
+            sudo mv abiii/onPremApp/css/ /var/www/html/
+
+
             # Start apache
             sudo service httpd start
             chkconfig httpd on
