@@ -1,5 +1,10 @@
 
 Description: Template to create source php Web App demo
+Parameters: 
+  DBUser: 
+    Type: String
+  DBPass:
+    Type: String
 
 Resources:
   onPremVPC:
@@ -194,19 +199,19 @@ Resources:
 
             sudo service mysql start 
 
-            mysqladmin -u root password Passw0rd
-            sudo mysql -u root "-pPassw0rd" -e "CREATE DATABASE OctankDB;Use OctankDB;create table person (id int auto_increment primary key,name text,age int,birth_day date);"
+            mysqladmin -u root password ${DBPass}
+            sudo mysql -u root "-p${DBPass}" -e "CREATE DATABASE OctankDB;Use OctankDB;create table person (id int auto_increment primary key,name text,age int,birth_day date);"
             
-            sudo mysql -u root "-pPassw0rd" -e  "Use OctankDB;insert into person (name, age, birth_day) select concat('user', ceil(rand() * 100)), floor(rand()*100), date_add(date("1900/01/01"), interval floor(rand()*100) year);"
-            sudo mysql -u root "-pPassw0rd" -e  "Use OctankDB;insert into person (name, age, birth_day) select concat('user', ceil(rand() * 100)), floor(rand()*100), date_add(date("1900/01/01"), interval floor(rand()*100) year);"
-            sudo mysql -u root "-pPassw0rd" -e  "Use OctankDB;insert into person (name, age, birth_day) select concat('user', ceil(rand() * 100)), floor(rand()*100), date_add(date("1900/01/01"), interval floor(rand()*100) year);"
-            sudo mysql -u root "-pPassw0rd" -e  "Use OctankDB;insert into person (name, age, birth_day) select concat('user', ceil(rand() * 100)), floor(rand()*100), date_add(date("1900/01/01"), interval floor(rand()*100) year);"
-            sudo mysql -u root "-pPassw0rd" -e  "Use OctankDB;insert into person (name, age, birth_day) select concat('user', ceil(rand() * 100)), floor(rand()*100), date_add(date("1900/01/01"), interval floor(rand()*100) year);"
-            sudo mysql -u root "-pPassw0rd" -e  "Use OctankDB;insert into person (name, age, birth_day) select concat('user', ceil(rand() * 100)), floor(rand()*100), date_add(date("1900/01/01"), interval floor(rand()*100) year);"
+            sudo mysql -u root "-p${DBPass}" -e  "Use OctankDB;insert into person (name, age, birth_day) select concat('user', ceil(rand() * 100)), floor(rand()*100), date_add(date("1900/01/01"), interval floor(rand()*100) year);"
+            sudo mysql -u root "-p${DBPass}" -e  "Use OctankDB;insert into person (name, age, birth_day) select concat('user', ceil(rand() * 100)), floor(rand()*100), date_add(date("1900/01/01"), interval floor(rand()*100) year);"
+            sudo mysql -u root "-p${DBPass}" -e  "Use OctankDB;insert into person (name, age, birth_day) select concat('user', ceil(rand() * 100)), floor(rand()*100), date_add(date("1900/01/01"), interval floor(rand()*100) year);"
+            sudo mysql -u root "-p${DBPass}" -e  "Use OctankDB;insert into person (name, age, birth_day) select concat('user', ceil(rand() * 100)), floor(rand()*100), date_add(date("1900/01/01"), interval floor(rand()*100) year);"
+            sudo mysql -u root "-p${DBPass}" -e  "Use OctankDB;insert into person (name, age, birth_day) select concat('user', ceil(rand() * 100)), floor(rand()*100), date_add(date("1900/01/01"), interval floor(rand()*100) year);"
+            sudo mysql -u root "-p${DBPass}" -e  "Use OctankDB;insert into person (name, age, birth_day) select concat('user', ceil(rand() * 100)), floor(rand()*100), date_add(date("1900/01/01"), interval floor(rand()*100) year);"
 
-            sudo mysql -u root "-pPassw0rd" -e "CREATE USER 'user1'@'%' IDENTIFIED BY 'Passw0rd'"
-            sudo mysql -u root "-pPassw0rd" -e "GRANT ALL PRIVILEGES ON *.* TO 'user1'@'%'"
-            sudo mysql -u root "-pPassw0rd" -e "FLUSH PRIVILEGES"
+            sudo mysql -u root "-p${DBPass}" -e "CREATE USER '${DBUser}'@'%' IDENTIFIED BY '${DBPass}'"
+            sudo mysql -u root "-p${DBPass}" -e "GRANT ALL PRIVILEGES ON *.* TO '${DBUser}'@'%'"
+            sudo mysql -u root "-p${DBPass}" -e "FLUSH PRIVILEGES"
       Tags:
         - Key: Name
           Value: DBInstance
@@ -227,7 +232,7 @@ Resources:
             sudo yum update -y
             sudo yum install php php-mysql git -y
 
-            echo "<?php \$dbserver='${EC2DB.PrivateIp}' ?>" > db.php
+            echo "<?php \$dbserver='${EC2DB.PrivateIp}'; \$u='${DBUser}'; \$p='${DBPass}'; \$database='OctankDB'; ?>" > db.php
             sudo mv db.php /var/www/html/
 
             # Clone repository
@@ -257,7 +262,7 @@ Resources:
             sudo yum update -y
             sudo yum install php php-mysql git -y
 
-            echo "\$dbserver='${EC2DB.PrivateIp}'" > db.php
+            echo "<?php \$dbserver='${EC2DB.PrivateIp}'; \$u='${DBUser}'; \$p='${DBPass}'; \$database='OctankDB'; ?>" > db.php
             sudo mv db.php /var/www/html/
 
             # Clone repository

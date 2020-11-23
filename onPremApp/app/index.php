@@ -51,13 +51,10 @@ if (isset($_SESSION['user'])) {
                          //import db connection info
                             
                             include('db.php');
-                            $u = "user1";
-                            $p = "Passw0rd";
-                            $dbname = "OctankDB";
                             // Create connection
 
                             try{
-                            $conn = mysqli_connect($dbserver, $u, $p, $dbname);
+                            $conn = mysqli_connect($dbserver, $u, $p, $database);
                             $sql = "SELECT name, age, birth_day FROM person";
                                         $result = $conn->query($sql);
 
