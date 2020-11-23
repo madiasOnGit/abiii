@@ -202,12 +202,12 @@ Resources:
             mysqladmin -u root password ${DBPass}
             sudo mysql -u root "-p${DBPass}" -e "CREATE DATABASE OctankDB;Use OctankDB;create table product (id int auto_increment primary key,name text,price text,descript text);"
             
-            sudo mysql -u root "-p${DBPass}" -e  "Use OctankDB;insert into product (name, price, descript) select Eosphorite, concat('$', floor(rand()*100)), 'Lorem ipsum dolor sit amet, consectetur adipisicing elit. Amet numquam aspernatur! ';"
-            sudo mysql -u root "-p${DBPass}" -e  "Use OctankDB;insert into product (name, price, descript) select Epidote, concat('$', floor(rand()*100)), 'onsectetur adipisicing elit. Amet numquam aspernatur! Lorem ipsum dolor sit amet.';"
-            sudo mysql -u root "-p${DBPass}" -e  "Use OctankDB;insert into product (name, price, descript) select Euclase, concat('$', floor(rand()*100)), 'Amet numquam aspernatur! Lorem ipsum dolor sit amet.';"
-            sudo mysql -u root "-p${DBPass}" -e  "Use OctankDB;insert into product (name, price, descript) select Eucryptite, concat('$', floor(rand()*100)), 'Lorem ipsum dolor sit amet, consectetur adipisicing elit.';"
-            sudo mysql -u root "-p${DBPass}" -e  "Use OctankDB;insert into product (name, price, descript) select Eudialyte, concat('$', floor(rand()*100)), 'Amet numquam aspernatur! Lorem ipsum dolor sit amet.';"
-            sudo mysql -u root "-p${DBPass}" -e  "Use OctankDB;insert into product (name, price, descript) select Rubellite, concat('$', floor(rand()*100)), 'elit. Amet numquam aspernatur! Lorem ipsum dolor sit amet.';"
+            sudo mysql -u root "-p${DBPass}" -e  "Use OctankDB;insert into product (name, price, descript) select 'Eosphorite', concat('$', floor(rand()*100)), 'Lorem ipsum dolor sit amet, consectetur adipisicing elit. Amet numquam aspernatur! ';"
+            sudo mysql -u root "-p${DBPass}" -e  "Use OctankDB;insert into product (name, price, descript) select 'Epidote', concat('$', floor(rand()*100)), 'onsectetur adipisicing elit. Amet numquam aspernatur! Lorem ipsum dolor sit amet.';"
+            sudo mysql -u root "-p${DBPass}" -e  "Use OctankDB;insert into product (name, price, descript) select 'Euclase', concat('$', floor(rand()*100)), 'Amet numquam aspernatur! Lorem ipsum dolor sit amet.';"
+            sudo mysql -u root "-p${DBPass}" -e  "Use OctankDB;insert into product (name, price, descript) select 'Eucryptite', concat('$', floor(rand()*100)), 'Lorem ipsum dolor sit amet, consectetur adipisicing elit.';"
+            sudo mysql -u root "-p${DBPass}" -e  "Use OctankDB;insert into product (name, price, descript) select 'Eudialyte', concat('$', floor(rand()*100)), 'Amet numquam aspernatur! Lorem ipsum dolor sit amet.';"
+            sudo mysql -u root "-p${DBPass}" -e  "Use OctankDB;insert into product (name, price, descript) select 'Rubellite', concat('$', floor(rand()*100)), 'elit. Amet numquam aspernatur! Lorem ipsum dolor sit amet.';"
       
             sudo mysql -u root "-p${DBPass}" -e "CREATE USER '${DBUser}'@'%' IDENTIFIED BY '${DBPass}'"
             sudo mysql -u root "-p${DBPass}" -e "GRANT ALL PRIVILEGES ON *.* TO '${DBUser}'@'%'"
@@ -240,7 +240,7 @@ Resources:
             sudo mv abiii/onPremApp/app/* /var/www/html/
             sudo mv abiii/onPremApp/css/ /var/www/html/
             sudo mv abiii/onPremApp/image/ /var/www/html/
-            
+
             # Start apache
             sudo service httpd start
             chkconfig httpd on
