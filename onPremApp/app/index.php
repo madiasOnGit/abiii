@@ -70,13 +70,13 @@ $start = $time;
             </ol>
             <div class="carousel-inner" role="listbox">
                 <div class="carousel-item active">
-                <img class="d-block img-fluid" src="/image/1.jpg" alt="First slide" width="900" height="350">
+                <img class="d-block img-fluid" src="/image/1.jpg" alt="First slide">
                 </div>
                 <div class="carousel-item">
-                <img class="d-block img-fluid" src="/image/2.jpg" alt="Second slide" width="900" height="350">
+                <img class="d-block img-fluid" src="/image/2.jpg" alt="Second slide">
                 </div>
                 <div class="carousel-item">
-                <img class="d-block img-fluid" src="/image/3.jpg" alt="Third slide" width="900" height="350">
+                <img class="d-block img-fluid" src="/image/3.jpg" alt="Third slide">
                 </div>
             </div>
             <a class="carousel-control-prev" href="#carouselExampleIndicators" role="button" data-slide="prev">
@@ -110,7 +110,7 @@ $start = $time;
 
                                         echo '<div class="col-lg-4 col-md-6 mb-4">';
                                         echo '<div class="card h-100">';
-                                        echo '<a href="#"><img class="card-img-top" src="/image/'. $row["name"] .'.png" alt="" width="700" height="400"></a>';
+                                        echo '<a href="#"><img class="card-img-top" src="/image/'. $row["name"] .'.png" alt=""></a>';
                                         echo '<div class="card-body">';
                                         echo     '<h4 class="card-title">';
                                         echo     '<a href="#">'. $row["name"].'</a>';
