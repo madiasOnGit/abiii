@@ -204,8 +204,8 @@ Resources:
             sudo mysql -u root "-pPassw0rd" -e  "Use OctankDB;insert into person (name, age, birth_day) select concat('user', ceil(rand() * 100)), floor(rand()*100), date_add(date("1900/01/01"), interval floor(rand()*100) year);"
             sudo mysql -u root "-pPassw0rd" -e  "Use OctankDB;insert into person (name, age, birth_day) select concat('user', ceil(rand() * 100)), floor(rand()*100), date_add(date("1900/01/01"), interval floor(rand()*100) year);"
 
-            sudo mysql -u root "-pPassw0rd" -e "CREATE USER 'mbdias'@'%' IDENTIFIED BY 'Passw0rd'"
-            sudo mysql -u root "-pPassw0rd" -e "GRANT ALL PRIVILEGES ON *.* TO 'mbdias'@'%'"
+            sudo mysql -u root "-pPassw0rd" -e "CREATE USER 'user1'@'%' IDENTIFIED BY 'Passw0rd'"
+            sudo mysql -u root "-pPassw0rd" -e "GRANT ALL PRIVILEGES ON *.* TO 'user1'@'%'"
             sudo mysql -u root "-pPassw0rd" -e "FLUSH PRIVILEGES"
       Tags:
         - Key: Name
@@ -227,7 +227,7 @@ Resources:
             sudo yum update -y
             sudo yum install php php-mysql git -y
 
-            echo "<?php \$dbserver=${EC2DB.PrivateIp} ?>" > db.php
+            echo "<?php \$dbserver='${EC2DB.PrivateIp}' ?>" > db.php
             sudo mv db.php /var/www/html/
 
             # Clone repository
@@ -257,7 +257,7 @@ Resources:
             sudo yum update -y
             sudo yum install php php-mysql git -y
 
-            echo "\$dbserver=${EC2DB.PrivateIp}" > db.php
+            echo "\$dbserver='${EC2DB.PrivateIp}'" > db.php
             sudo mv db.php /var/www/html/
 
             # Clone repository

@@ -46,15 +46,18 @@ if (isset($_SESSION['user'])) {
                         if ($EC2_AZ == 'us-east-1b') $COLOR = "green";
                         echo '<p style="font-family:verdana;font-size:180%;color:' . $COLOR . '">' . $EC2_AZ;
                       
-                         <!--Select db records-->
+                         
                  
                          //import db connection info
                             
                             include('db.php');
+                            $u = "user1";
+                            $p = "Passw0rd";
+                            $dbname = "OctankDB";
                             // Create connection
 
                             try{
-                            $conn = mysqli_connect($servername, $u, $p, $dbname);
+                            $conn = mysqli_connect($dbserver, $u, $p, $dbname);
                             $sql = "SELECT name, age, birth_day FROM person";
                                         $result = $conn->query($sql);
 
@@ -77,7 +80,7 @@ if (isset($_SESSION['user'])) {
                             ?>
 
                     </div>
-                    <img src="image/unicorn.png" width="250" height="250" class="img-unicorn"/>
+                   
                 </div>
             </div>
         </div>
