@@ -155,6 +155,61 @@ Resources:
       Tags:
         - Key: Name
           Value: WebSg
+  DBSecurityGroup:
+    Type: 'AWS::EC2::SecurityGroup'
+    Properties:
+      GroupName: DBSg
+      GroupDescription: HTTP(S)
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: '3306'
+          ToPort: '3306'
+          SourceSecurityGroupId: !Ref WebSecurityGroup
+      VpcId: !Ref onPremVPC
+      Tags:
+        - Key: Name
+          Value: DBSg
+  EC2DB:
+    Type: 'AWS::EC2::Instance'
+    Properties:
+      ImageId: ami-014ce76919b528bff
+      InstanceType: t2.micro
+      SubnetId: !Ref PrivateSubnet
+      KeyName: devKeyIreland
+      SecurityGroupIds:
+        - !Ref DBSecurityGroup
+      UserData:
+        Fn::Base64:
+          !Sub |
+            #!/bin/bash
+            sudo yum update -y
+            wget https://downloads.mysql.com/archives/get/p/23/file/MySQL-server-5.5.55-1.el7.x86_64.rpm
+            wget https://downloads.mysql.com/archives/get/p/23/file/MySQL-client-5.5.55-1.el7.x86_64.rpm
+
+
+            sudo yum remove mariadb-libs -y
+
+            sudo yum localinstall MySQL-server-5.5.55-1.el7.x86_64.rpm -y
+            sudo yum localinstall MySQL-client-5.5.55-1.el7.x86_64.rpm -y
+
+            sudo service mysql start 
+
+            mysqladmin -u root password Passw0rd
+            sudo mysql -u root "-pPassw0rd" -e "CREATE DATABASE OctankDB;Use OctankDB;create table person (id int auto_increment primary key,name text,age int,birth_day date);"
+            
+            sudo mysql -u root "-pPassw0rd" -e  "Use OctankDB;insert into person (name, age, birth_day) select concat('user', ceil(rand() * 100)), floor(rand()*100), date_add(date("1900/01/01"), interval floor(rand()*100) year);"
+            sudo mysql -u root "-pPassw0rd" -e  "Use OctankDB;insert into person (name, age, birth_day) select concat('user', ceil(rand() * 100)), floor(rand()*100), date_add(date("1900/01/01"), interval floor(rand()*100) year);"
+            sudo mysql -u root "-pPassw0rd" -e  "Use OctankDB;insert into person (name, age, birth_day) select concat('user', ceil(rand() * 100)), floor(rand()*100), date_add(date("1900/01/01"), interval floor(rand()*100) year);"
+            sudo mysql -u root "-pPassw0rd" -e  "Use OctankDB;insert into person (name, age, birth_day) select concat('user', ceil(rand() * 100)), floor(rand()*100), date_add(date("1900/01/01"), interval floor(rand()*100) year);"
+            sudo mysql -u root "-pPassw0rd" -e  "Use OctankDB;insert into person (name, age, birth_day) select concat('user', ceil(rand() * 100)), floor(rand()*100), date_add(date("1900/01/01"), interval floor(rand()*100) year);"
+            sudo mysql -u root "-pPassw0rd" -e  "Use OctankDB;insert into person (name, age, birth_day) select concat('user', ceil(rand() * 100)), floor(rand()*100), date_add(date("1900/01/01"), interval floor(rand()*100) year);"
+
+            sudo mysql -u root "-pPassw0rd" -e "CREATE USER 'mbdias'@'%' IDENTIFIED BY 'Passw0rd'"
+            sudo mysql -u root "-pPassw0rd" -e "GRANT ALL PRIVILEGES ON *.* TO 'mbdias'@'%'"
+            sudo mysql -u root "-pPassw0rd" -e "FLUSH PRIVILEGES"
+      Tags:
+        - Key: Name
+          Value: DBInstance
   EC2App1:
     Type: 'AWS::EC2::Instance'
     Properties:
@@ -170,12 +225,13 @@ Resources:
             #!/bin/bash
             # Install dependecies
             sudo yum update -y
-            sudo yum install php php-memcache git -y
+            sudo yum install php php-mysql git -y
             # Clone repository
             git clone https://github.com/aws-samples/aws-ec2-autoscaling-php-app-demo.git
             sudo mv aws-ec2-autoscaling-php-app-demo/src/app/* /var/www/html/
             sudo mv aws-ec2-autoscaling-php-app-demo/src/image/ /var/www/html/
             sudo mv aws-ec2-autoscaling-php-app-demo/src/css/ /var/www/html/
+            echo 
             # Start apache
             sudo service httpd start
             chkconfig httpd on
@@ -197,7 +253,7 @@ Resources:
             #!/bin/bash
             # Install dependecies
             sudo yum update -y
-            sudo yum install php php-memcache git -y
+            sudo yum install php php-mysql git -y
             # Clone repository
             git clone https://github.com/aws-samples/aws-ec2-autoscaling-php-app-demo.git
             sudo mv aws-ec2-autoscaling-php-app-demo/src/app/* /var/www/html/
