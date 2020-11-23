@@ -200,14 +200,15 @@ Resources:
             sudo service mysql start 
 
             mysqladmin -u root password ${DBPass}
-            sudo mysql -u root "-p${DBPass}" -e "CREATE DATABASE OctankDB;Use OctankDB;create table person (id int auto_increment primary key,name text,age int,birth_day date);"
+            sudo mysql -u root "-p${DBPass}" -e "CREATE DATABASE OctankDB;Use OctankDB;create table product (id int auto_increment primary key,name text,price text,desc text);"
             
-            sudo mysql -u root "-p${DBPass}" -e  "Use OctankDB;insert into person (name, age, birth_day) select concat('user', ceil(rand() * 100)), floor(rand()*100), date_add(date("1900/01/01"), interval floor(rand()*100) year);"
-            sudo mysql -u root "-p${DBPass}" -e  "Use OctankDB;insert into person (name, age, birth_day) select concat('user', ceil(rand() * 100)), floor(rand()*100), date_add(date("1900/01/01"), interval floor(rand()*100) year);"
-            sudo mysql -u root "-p${DBPass}" -e  "Use OctankDB;insert into person (name, age, birth_day) select concat('user', ceil(rand() * 100)), floor(rand()*100), date_add(date("1900/01/01"), interval floor(rand()*100) year);"
-            sudo mysql -u root "-p${DBPass}" -e  "Use OctankDB;insert into person (name, age, birth_day) select concat('user', ceil(rand() * 100)), floor(rand()*100), date_add(date("1900/01/01"), interval floor(rand()*100) year);"
-            sudo mysql -u root "-p${DBPass}" -e  "Use OctankDB;insert into person (name, age, birth_day) select concat('user', ceil(rand() * 100)), floor(rand()*100), date_add(date("1900/01/01"), interval floor(rand()*100) year);"
-            sudo mysql -u root "-p${DBPass}" -e  "Use OctankDB;insert into person (name, age, birth_day) select concat('user', ceil(rand() * 100)), floor(rand()*100), date_add(date("1900/01/01"), interval floor(rand()*100) year);"
+            sudo mysql -u root "-p${DBPass}" -e  "Use OctankDB;insert into product (name, price, desc) select concat('Product', ceil(rand() * 100)), concat('$', floor(rand()*100)), 'Lorem ipsum dolor sit amet, consectetur adipisicing elit. Amet numquam aspernatur! ';"
+            sudo mysql -u root "-p${DBPass}" -e  "Use OctankDB;insert into product (name, price, desc) select concat('Product', ceil(rand() * 100)), concat('$', floor(rand()*100)), 'onsectetur adipisicing elit. Amet numquam aspernatur! Lorem ipsum dolor sit amet.';"
+            sudo mysql -u root "-p${DBPass}" -e  "Use OctankDB;insert into product (name, price, desc) select concat('Product', ceil(rand() * 100)), concat('$', floor(rand()*100)), 'Amet numquam aspernatur! Lorem ipsum dolor sit amet.';"
+            sudo mysql -u root "-p${DBPass}" -e  "Use OctankDB;insert into product (name, price, desc) select concat('Product', ceil(rand() * 100)), concat('$', floor(rand()*100)), 'Lorem ipsum dolor sit amet, consectetur adipisicing elit.';"
+            sudo mysql -u root "-p${DBPass}" -e  "Use OctankDB;insert into product (name, price, desc) select concat('Product', ceil(rand() * 100)), concat('$', floor(rand()*100)), 'Amet numquam aspernatur! Lorem ipsum dolor sit amet.';"
+            sudo mysql -u root "-p${DBPass}" -e  "Use OctankDB;insert into product (name, price, desc) select concat('Product', ceil(rand() * 100)), concat('$', floor(rand()*100)), 'elit. Amet numquam aspernatur! Lorem ipsum dolor sit amet.';"
+            sudo mysql -u root "-p${DBPass}" -e  "Use OctankDB;insert into product (name, price, desc) select concat('Product', ceil(rand() * 100)), concat('$', floor(rand()*100)), 'Lorem ipsum dolor sit amet, Amet numquam aspernatur! Lorem ipsum dolor sit amet.';"
 
             sudo mysql -u root "-p${DBPass}" -e "CREATE USER '${DBUser}'@'%' IDENTIFIED BY '${DBPass}'"
             sudo mysql -u root "-p${DBPass}" -e "GRANT ALL PRIVILEGES ON *.* TO '${DBUser}'@'%'"
