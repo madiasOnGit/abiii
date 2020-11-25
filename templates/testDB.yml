@@ -1,0 +1,90 @@
+Description: Template to create destination php Web App demo
+Parameters: 
+
+  DBUser: 
+    Type: String
+  DBPass:
+    Type: String
+
+Resources:
+
+  cloudVPC:
+    Type: 'AWS::EC2::VPC'
+    Properties:
+      CidrBlock: 10.40.0.0/16
+      Tags:
+        - Key: Name
+          Value: !Join [_, [!Ref 'AWS::StackName', VPC]]
+  
+  PublicSubnet1:
+    Type: 'AWS::EC2::Subnet'
+    Properties:
+      VpcId: !Ref cloudVPC
+      AvailabilityZone: !Select
+        - '0'
+        - !GetAZs ''
+      CidrBlock: 10.40.0.0/24
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: !Join [_, [!Ref 'AWS::StackName', PublicSubnet1]]
+  
+  PublicSubnet2:
+    Type: 'AWS::EC2::Subnet'
+    Properties:
+      VpcId: !Ref cloudVPC
+      AvailabilityZone: !Select
+        - '1'
+        - !GetAZs ''
+      CidrBlock: 10.40.1.0/24
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: !Join [_, [!Ref 'AWS::StackName', PublicSubnet2]]
+   
+  MySQLSecurityGroup:
+    Type: 'AWS::EC2::SecurityGroup'
+    Properties:
+      VpcId: !Ref cloudVPC
+      GroupDescription: Marker security group for MySQL server.
+
+  DBParamGroup:
+    Type: 'AWS::RDS::DBParameterGroup'
+    Properties:
+      Description: Default parameter group
+      Family: MySQL8.0
+      Parameters:
+        character_set_database: utf8mb4
+        character_set_client: utf8mb4
+        character_set_connection: utf8mb4
+        character_set_results: utf8mb4
+        character_set_server: utf8mb4
+        skip-character-set-client-handshake: 'TRUE'
+  
+  DBSubnetGroup:
+    Type: 'AWS::RDS::DBSubnetGroup'
+    Properties:
+      DBSubnetGroupDescription: Database subnets for RDS
+      SubnetIds:
+        - !Ref PublicSubnet1
+        - !Ref PublicSubnet2
+  
+  DBInstance:
+    Type: 'AWS::RDS::DBInstance'
+    DeletionPolicy: Snapshot
+    Properties:
+      DBInstanceClass: db.t2.micro
+      AllocatedStorage: '5'
+      Engine: MySQL
+      MultiAZ: 'false'
+      EngineVersion: 8.0.20
+      MasterUsername: !Ref DBUser
+      MasterUserPassword: !Ref DBPass
+      BackupRetentionPeriod: '35'
+      DBParameterGroupName: !Ref DBParamGroup
+      DBSubnetGroupName: !Ref DBSubnetGroup
+      DBSnapshotIdentifier: !Ref 'AWS::NoValue'
+      PreferredBackupWindow: '19:00-19:30'
+      PreferredMaintenanceWindow: 'sat:20:00-sat:20:30'
+      VPCSecurityGroups:
+        - !Ref MySQLSecurityGroup

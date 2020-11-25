@@ -68,6 +68,32 @@ Resources:
         - Key: Name
           Value: !Join [_, [!Ref 'AWS::StackName', PrivateSubnet2]]
 
+  DBSubnet1:
+    Type: 'AWS::EC2::Subnet'
+    Properties:
+      AvailabilityZone: !Select
+        - '0'
+        - !GetAZs ''
+      VpcId: !Ref cloudVPC
+      CidrBlock: 10.30.4.0/24
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: !Join [_, [!Ref 'AWS::StackName', DBSubnet1]]
+
+  DBSubnet2:
+    Type: 'AWS::EC2::Subnet'
+    Properties:
+      AvailabilityZone: !Select
+        - '1'
+        - !GetAZs ''
+      VpcId: !Ref cloudVPC
+      CidrBlock: 10.30.5.0/24
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: !Join [_, [!Ref 'AWS::StackName', DBSubnet2]]
+
   InternetGateway:
     Type: 'AWS::EC2::InternetGateway'
     Properties:
@@ -125,7 +151,7 @@ Resources:
         - Key: Name
           Value: HTTPSgALB
 
-  WebSecurityGroup:
+  APPSecurityGroup:
     Type: 'AWS::EC2::SecurityGroup'
     Properties:
       GroupName: WebSg
@@ -143,6 +169,21 @@ Resources:
       Tags:
         - Key: Name
           Value: WebSg
+
+  MySQLSecurityGroup:
+    Type: 'AWS::EC2::SecurityGroup'
+    Properties:
+      GroupName: DBSg
+      VpcId: !Ref cloudVPC
+      GroupDescription: Marker security group for MySQL server.
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: '3306'
+          ToPort: '3306'
+          SourceSecurityGroupId: !Ref APPSecurityGroup
+      Tags:
+        - Key: Name
+          Value: DBSg
   
   NotificationTopic:
     Type: 'AWS::SNS::Topic'
@@ -175,11 +216,12 @@ Resources:
   
   LaunchConfig:
     Type: 'AWS::AutoScaling::LaunchConfiguration'
+    DependsOn: 'DBInstance'
     Properties:
       ImageId: ami-014ce76919b528bff
       InstanceType: t2.micro
       SecurityGroups:
-        - !Ref WebSecurityGroup
+        - !Ref APPSecurityGroup
       UserData:
         Fn::Base64:
           !Sub |
@@ -187,6 +229,9 @@ Resources:
             # Install dependecies
             sudo yum update -y
             sudo yum install php php-mysql git -y
+
+            echo "<?php \$dbserver='${DBInstance.Endpoint.Address}'; \$u='${DBUser}'; \$p='${DBPass}'; \$database='OctankDB'; ?>" > db.php
+            sudo mv db.php /var/www/html/
 
             # Clone repository
             git clone https://github.com/madiasOnGit/abiii.git
@@ -282,6 +327,48 @@ Resources:
       LoadBalancerArn: !Ref ALB
       Port: 80
       Protocol: HTTP
+
+
+  DBParamGroup:
+    Type: 'AWS::RDS::DBParameterGroup'
+    Properties:
+      Description: Default parameter group
+      Family: MySQL8.0
+      Parameters:
+        character_set_database: utf8mb4
+        character_set_client: utf8mb4
+        character_set_connection: utf8mb4
+        character_set_results: utf8mb4
+        character_set_server: utf8mb4
+        skip-character-set-client-handshake: 'TRUE'
+
+  DBSubnetGroup:
+    Type: 'AWS::RDS::DBSubnetGroup'
+    Properties:
+      DBSubnetGroupDescription: Database subnets for RDS
+      SubnetIds:
+        - !Ref DBSubnet1
+        - !Ref DBSubnet2
+
+  DBInstance:
+    Type: 'AWS::RDS::DBInstance'
+    DeletionPolicy: Snapshot
+    Properties:
+      DBInstanceClass: db.t2.micro
+      AllocatedStorage: '5'
+      Engine: MySQL
+      MultiAZ: 'false'
+      EngineVersion: 8.0.20
+      MasterUsername: !Ref DBUser
+      MasterUserPassword: !Ref DBPass
+      BackupRetentionPeriod: '35'
+      DBParameterGroupName: !Ref DBParamGroup
+      DBSubnetGroupName: !Ref DBSubnetGroup
+      DBSnapshotIdentifier: !Ref 'AWS::NoValue'
+      PreferredBackupWindow: '19:00-19:30'
+      PreferredMaintenanceWindow: 'sat:20:00-sat:20:30'
+      VPCSecurityGroups:
+        - !Ref MySQLSecurityGroup
 
 ## Outputs ##
 Outputs:
