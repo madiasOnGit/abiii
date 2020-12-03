@@ -29,9 +29,9 @@ session_start();
 
 <body>
   <!-- Navigation -->
-  <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+  <nav class="navbar navbar-expand-lg navbar-dark bg-info fixed-top">
     <div class="container">
-      <a class="navbar-brand" href="#">Octank Store</a>
+      <a class="navbar-brand" href="#">Octank Rocks</a>
       <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
       </button>
@@ -50,9 +50,6 @@ session_start();
           </li>
           <li class="nav-item">
             <a class="nav-link" href="#">Contact</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link btn btn-lg btn-primary btn-block text-uppercase" href="stress.php?stress">Stress</a>
           </li>
         </ul>
       </div>
